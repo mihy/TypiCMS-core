@@ -1,6 +1,6 @@
 <template>
-    <div class="mb-4">
-        <input type="hidden" name="file_ids" :value="fileIds.join()" />
+    <div>
+        <input type="hidden" :name="'file_ids[' + collection + ']'" :value="fileIds.join()" />
         <div class="mb-3">
             <label class="form-label">{{ $t(label) }}</label>
             <p>
@@ -141,6 +141,10 @@ export default {
             type: Array,
             required: true,
         },
+        collection: {
+            type: String,
+            default: 'default',
+        },
     },
     data() {
         return {
@@ -148,10 +152,12 @@ export default {
         };
     },
     mounted() {
-        this.$root.$on('filesAdded', (files) => {
-            for (var i = files.length - 1; i >= 0; i--) {
-                if (this.files.find(({ id }) => id === files[i].id) === undefined) {
-                    this.files.push(files[i]);
+        this.$root.$on('filesAdded', (files, options) => {
+            if (this.collection === options.collection) {
+                for (var i = files.length - 1; i >= 0; i--) {
+                    if (this.files.find(({ id }) => id === files[i].id) === undefined) {
+                        this.files.push(files[i]);
+                    }
                 }
             }
         });
@@ -168,6 +174,7 @@ export default {
     methods: {
         openFilepicker() {
             let options = {
+                collection: this.collection,
                 open: true,
                 multiple: true,
                 overlay: true,
